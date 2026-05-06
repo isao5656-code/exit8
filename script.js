@@ -19,6 +19,8 @@ const state = {
   targetYaw: 0,
   targetPitch: 0,
   move: null,
+  feedbackTimer: null,
+  holdCamera: null,
 };
 
 const elements = {
@@ -295,10 +297,10 @@ function buildWorld() {
   const floorTexture = makeTexture(createTileCanvas('#c7cbc9', '#81878a'), true);
   const ceilingTexture = makeTexture(createTileCanvas('#b8bcbc', '#7b8286'), true);
 
-  addPlane(6, 34, { texture: floorTexture, position: [0, 0, -9], rotation: [-Math.PI / 2, 0, 0], uRepeat: 5, vRepeat: 18 });
-  addPlane(6, 34, { texture: ceilingTexture, position: [0, 3.2, -9], rotation: [Math.PI / 2, 0, 0], uRepeat: 4, vRepeat: 14, fade: 0.92 });
-  addPlane(34, 3.2, { texture: wallTexture, position: [-3, 1.6, -9], rotation: [0, Math.PI / 2, 0], uRepeat: 18, vRepeat: 3 });
-  addPlane(34, 3.2, { texture: wallTexture, position: [3, 1.6, -9], rotation: [0, -Math.PI / 2, 0], uRepeat: 18, vRepeat: 3 });
+  addPlane(6, 54, { texture: floorTexture, position: [0, 0, -7], rotation: [-Math.PI / 2, 0, 0], uRepeat: 5, vRepeat: 28 });
+  addPlane(6, 54, { texture: ceilingTexture, position: [0, 3.2, -7], rotation: [Math.PI / 2, 0, 0], uRepeat: 4, vRepeat: 24, fade: 0.92 });
+  addPlane(54, 3.2, { texture: wallTexture, position: [-3, 1.6, -7], rotation: [0, Math.PI / 2, 0], uRepeat: 28, vRepeat: 3 });
+  addPlane(54, 3.2, { texture: wallTexture, position: [3, 1.6, -7], rotation: [0, -Math.PI / 2, 0], uRepeat: 28, vRepeat: 3 });
   addPlane(6, 3.2, { texture: wallTexture, position: [0, 1.6, -25.8], rotation: [0, 0, 0], uRepeat: 4, vRepeat: 3, fade: 0.72 });
 
   objects.guideBlocks = [];
@@ -450,41 +452,58 @@ function setMessage(text, tone = '') {
   elements.message.textContent = text;
 }
 
-function startMove(answeredAnomaly, onDone) {
+function startTraversal(answeredAnomaly, onArrive) {
   state.locked = true;
+  state.targetYaw = 0;
+  state.targetPitch = 0;
   renderHud();
-  state.move = { elapsed: 0, duration: 0.9, direction: answeredAnomaly ? -1 : 1, onDone };
+  setMessage(answeredAnomaly ? '実際に後ろを向いて、入口方向へ引き返しています。' : '実際に3D通路の奥へ進んでいます。');
+  state.move = {
+    elapsed: 0,
+    duration: answeredAnomaly ? 3.0 : 2.8,
+    answeredAnomaly,
+    onArrive,
+  };
 }
 
-function resetGame(reason, answeredAnomaly) {
-  state.exitCount = 0;
-  setMessage(`${reason} 出口0に戻されました。`, 'bad');
-  startMove(answeredAnomaly, chooseNextScene);
-}
+function finishDecision({ answeredAnomaly, isCorrect, anomalyLabel }) {
+  if (!isCorrect) {
+    state.exitCount = 0;
+    const reason = anomalyLabel ? `見落としです。${anomalyLabel}` : '異変はありませんでした。前へ進むべきでした。';
+    setMessage(`${reason} 出口0に戻されました。`, 'bad');
+  } else {
+    state.exitCount += 1;
+    if (state.exitCount >= 8) {
+      state.exitCount = 0;
+      setMessage('脱出成功。出口8に到達しました。もう一度、出口0から始まります。', 'good');
+    } else {
+      const detail = answeredAnomaly ? anomalyLabel : '異変なし。正しく前へ進みました。';
+      setMessage(`正解。${detail}`, 'good');
+    }
+  }
 
-function completeGame(answeredAnomaly) {
-  state.exitCount = 0;
-  setMessage('脱出成功。出口8に到達しました。もう一度、出口0から始まります。', 'good');
-  startMove(answeredAnomaly, chooseNextScene);
+  renderHud();
+  window.clearTimeout(state.feedbackTimer);
+  state.feedbackTimer = window.setTimeout(() => {
+    chooseNextScene();
+    state.move = null;
+    state.yaw = 0;
+    state.pitch = 0;
+    state.targetYaw = 0;
+    state.targetPitch = 0;
+    state.holdCamera = null;
+    state.locked = false;
+    setMessage('3D通路を見回して、異変がなければ進む。異変があれば引き返す。');
+    renderHud();
+  }, 1300);
 }
 
 function handleAnswer(answeredAnomaly) {
   if (state.locked) return;
   const actuallyAnomaly = Boolean(state.currentAnomaly);
+  const anomalyLabel = state.currentAnomaly?.label || '';
   const isCorrect = answeredAnomaly === actuallyAnomaly;
-  if (!isCorrect) {
-    const reason = actuallyAnomaly ? `見落としです。${state.currentAnomaly.label}` : '異変はありませんでした。前へ進むべきでした。';
-    resetGame(reason, answeredAnomaly);
-    return;
-  }
-  state.exitCount += 1;
-  if (state.exitCount >= 8) {
-    completeGame(answeredAnomaly);
-    return;
-  }
-  const detail = actuallyAnomaly ? state.currentAnomaly.label : '異変なし。正しく前へ進みました。';
-  setMessage(`正解。${detail}`, 'good');
-  startMove(answeredAnomaly, chooseNextScene);
+  startTraversal(answeredAnomaly, () => finishDecision({ answeredAnomaly, isCorrect, anomalyLabel }));
 }
 
 function resize() {
@@ -512,22 +531,34 @@ function update(delta) {
   state.yaw += (state.targetYaw - state.yaw) * Math.min(1, delta * 8);
   state.pitch += (state.targetPitch - state.pitch) * Math.min(1, delta * 8);
   const cameraPosition = { ...cameraBase };
+
   if (state.move) {
     state.move.elapsed += delta;
     const progress = Math.min(1, state.move.elapsed / state.move.duration);
     const eased = 1 - (1 - progress) ** 3;
-    cameraPosition.z = cameraBase.z - state.move.direction * eased * 3.1;
-    state.targetYaw = state.move.direction < 0 ? Math.sin(progress * Math.PI) * 0.26 : 0;
+
+    if (state.move.answeredAnomaly) {
+      const turnProgress = Math.min(1, progress / 0.32);
+      const turnEase = 1 - (1 - turnProgress) ** 3;
+      state.yaw = Math.PI * turnEase;
+      cameraPosition.z = cameraBase.z + Math.max(0, (progress - 0.2) / 0.8) * 9.0;
+      cameraPosition.x = Math.sin(progress * Math.PI * 2) * 0.12;
+    } else {
+      state.yaw = 0;
+      cameraPosition.z = cameraBase.z - eased * 26.5;
+      cameraPosition.x = Math.sin(progress * Math.PI * 8) * 0.045;
+      cameraPosition.y = cameraBase.y + Math.sin(progress * Math.PI * 12) * 0.025;
+    }
+
     if (progress >= 1) {
-      const onDone = state.move.onDone;
+      const onArrive = state.move.onArrive;
+      state.holdCamera = { ...cameraPosition };
       state.move = null;
-      state.targetYaw = 0;
-      onDone();
-      setMessage('3D通路を見回して、異変がなければ進む。異変があれば引き返す。');
-      state.locked = false;
-      renderHud();
+      onArrive();
     }
   }
+
+  if (state.holdCamera) return state.holdCamera;
   return cameraPosition;
 }
 
