@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#111315" />
+    <title>Exit 8風 異変さがし</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app" aria-live="polite">
+      <section class="hud" aria-label="ゲーム情報">
+        <div>
+          <span class="hud__label">現在地</span>
+          <strong id="exitCount">0 / 8</strong>
+        </div>
+        <div>
+          <span class="hud__label">連続正解</span>
+          <strong id="streak">0</strong>
+        </div>
+        <button id="helpButton" class="ghost-button" type="button">遊び方</button>
+      </section>
+
+      <section class="message" id="message">
+        通路をよく観察して、異変があれば「引き返す」。なければ「進む」。
+      </section>
+
+      <section class="corridor-wrap" aria-label="地下通路">
+        <div class="corridor" id="corridor">
+          <div class="ceiling">
+            <span class="lamp lamp--1"></span>
+            <span class="lamp lamp--2"></span>
+            <span class="lamp lamp--3"></span>
+          </div>
+          <div class="wall wall--left">
+            <div class="poster poster--left" id="posterLeft">
+              <span>出口案内</span>
+              <strong>8</strong>
+            </div>
+            <div class="door" id="doorLeft"><span class="handle"></span></div>
+          </div>
+          <div class="back-wall">
+            <div class="exit-sign" id="exitSign">出口 8</div>
+            <div class="vanishing-door"></div>
+          </div>
+          <div class="wall wall--right">
+            <div class="poster poster--right" id="posterRight">
+              <span>注意</span>
+              <strong>走らない</strong>
+            </div>
+            <div class="pipe" id="pipe"></div>
+          </div>
+          <div class="floor" id="floor">
+            <span class="floor-line floor-line--left"></span>
+            <span class="floor-line floor-line--right"></span>
+            <span class="lost-tile" id="lostTile"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="controls" aria-label="回答">
+        <button id="turnBackButton" class="action action--danger" type="button">
+          <span>異変あり</span>
+          <strong>引き返す</strong>
+        </button>
+        <button id="goForwardButton" class="action action--safe" type="button">
+          <span>異変なし</span>
+          <strong>進む</strong>
+        </button>
+      </section>
+
+      <dialog id="helpDialog" class="help-dialog">
+        <h1>遊び方</h1>
+        <p>毎回、同じように見える地下通路が表示されます。看板・照明・ポスター・床などに異変がないか確認してください。</p>
+        <ul>
+          <li>異変を見つけたら「引き返す」</li>
+          <li>何もなければ「進む」</li>
+          <li>8回正解すると脱出成功。間違えると0からやり直しです。</li>
+        </ul>
+        <button id="closeHelpButton" class="action action--safe" type="button">閉じる</button>
+      </dialog>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
