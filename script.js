@@ -33,6 +33,10 @@ const elements = {
   closeHelpButton: document.querySelector('#closeHelpButton'),
 };
 
+window.addEventListener('error', (event) => {
+  setMessage(`3D初期化エラー: ${event.message}`, 'bad');
+});
+
 const gl = elements.canvas.getContext('webgl', { antialias: true, alpha: false });
 if (!gl) {
   setMessage('この端末ではWebGLが使えないため、3D表示を開始できません。', 'bad');
@@ -608,8 +612,8 @@ if (gl) {
   };
   whiteTexture = makeSolidTexture(255, 255, 255);
   gl.enable(gl.DEPTH_TEST);
-  gl.enable(gl.CULL_FACE);
-  gl.cullFace(gl.BACK);
+  // Do not enable face culling: corridor planes are visible from inside,
+  // and browser/GPU differences can otherwise cull the surfaces and show a black screen.
   buildWorld();
   chooseNextScene();
   renderHud();
