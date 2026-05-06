@@ -3,87 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0b0d10" />
-    <title>3D Exit 8風 異変さがし</title>
+    <meta name="theme-color" content="#050608" />
+    <title>3D Exit Loop - 異変脱出ゲーム</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="app" aria-live="polite">
+      <canvas id="gameCanvas" class="game-canvas" aria-label="3D地下通路ゲーム画面"></canvas>
+
       <section class="hud" aria-label="ゲーム情報">
-        <div>
-          <span class="hud__label">出口番号</span>
-          <strong id="exitCount">0 / 8</strong>
+        <div class="hud__block">
+          <span class="hud__label">出口</span>
+          <strong id="exitCount">0</strong>
         </div>
-        <div>
-          <span class="hud__label">判定</span>
-          <strong id="streak">観察中</strong>
+        <div class="hud__block">
+          <span class="hud__label">状態</span>
+          <strong id="statusText">観察中</strong>
         </div>
         <button id="helpButton" class="ghost-button" type="button">遊び方</button>
       </section>
 
       <section class="message" id="message">
-        異変がなければ前へ進む。異変を見つけたらすぐ引き返す。
-      </section>
-
-      <section class="scene-shell" aria-label="3D地下通路">
-        <div class="scene" id="scene">
-          <div class="depth depth--far"></div>
-          <div class="ceiling-3d">
-            <span class="ceiling-line ceiling-line--1"></span>
-            <span class="ceiling-line ceiling-line--2"></span>
-            <span class="ceiling-line ceiling-line--3"></span>
-            <span class="light light--near"></span>
-            <span class="light light--mid"></span>
-            <span class="light light--far"></span>
-          </div>
-
-          <div class="wall-3d wall-3d--left">
-            <div class="tile-grid"></div>
-            <article class="poster poster--blue">
-              <span>アルバイト</span>
-              <strong>募集</strong>
-            </article>
-            <article class="poster poster--cream">
-              <span>地下通路</span>
-              <strong>案内</strong>
-            </article>
-            <article class="poster poster--small">
-              <span>広告</span>
-            </article>
-          </div>
-
-          <div class="wall-3d wall-3d--right">
-            <div class="tile-grid"></div>
-            <div class="exit-board" id="exitBoard">
-              <span>出口</span>
-              <em>Exit</em>
-              <strong>8</strong>
-            </div>
-            <div class="vent vent--top"></div>
-            <div class="service-door"><span></span></div>
-            <div class="notice">防犯カメラ作動中</div>
-          </div>
-
-          <div class="floor-3d">
-            <div class="floor-grid"></div>
-            <div class="guidance-strip"></div>
-            <span class="fallen-tile"></span>
-          </div>
-
-          <div class="npc" aria-hidden="true">
-            <span class="npc__head"></span>
-            <span class="npc__neck"></span>
-            <span class="npc__body"></span>
-            <span class="npc__arm npc__arm--left"></span>
-            <span class="npc__arm npc__arm--right"></span>
-            <span class="npc__leg npc__leg--left"></span>
-            <span class="npc__leg npc__leg--right"></span>
-            <span class="npc__bag"></span>
-          </div>
-
-          <div class="direction-sign">出口 8 ↑</div>
-          <div class="fog"></div>
-        </div>
+        3D通路を見回して、異変がなければ進む。異変があれば引き返す。
       </section>
 
       <section class="controls" aria-label="回答">
@@ -99,17 +40,18 @@
 
       <dialog id="helpDialog" class="help-dialog">
         <h1>遊び方</h1>
-        <p>8番出口風のルールです。毎回同じように見える3D通路を観察し、異変の有無だけを判断します。</p>
+        <p>これはWebGLで描画する本物の3D通路です。スマホでは画面をドラッグすると少し視点を動かせます。</p>
         <ul>
-          <li>異変を見つけたら「引き返す」</li>
-          <li>異変がなければ「進む」</li>
-          <li>正解すると出口番号が進み、8まで進むと脱出成功です。</li>
-          <li>1回でも間違えると出口0へ戻されます。</li>
+          <li>通路に異変がなければ「進む」を押します。</li>
+          <li>通路に異変があれば「引き返す」を押します。</li>
+          <li>正解すると出口番号が1つ進みます。</li>
+          <li>1回でも間違えると出口0に戻ります。</li>
+          <li>出口8で正解すると脱出成功です。</li>
         </ul>
         <button id="closeHelpButton" class="action action--safe" type="button">閉じる</button>
       </dialog>
     </main>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
   </body>
 </html>
