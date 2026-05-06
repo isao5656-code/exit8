@@ -3,58 +3,86 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#111315" />
-    <title>Exit 8風 異変さがし</title>
+    <meta name="theme-color" content="#0b0d10" />
+    <title>3D Exit 8風 異変さがし</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="app" aria-live="polite">
       <section class="hud" aria-label="ゲーム情報">
         <div>
-          <span class="hud__label">現在地</span>
+          <span class="hud__label">出口番号</span>
           <strong id="exitCount">0 / 8</strong>
         </div>
         <div>
-          <span class="hud__label">連続正解</span>
-          <strong id="streak">0</strong>
+          <span class="hud__label">判定</span>
+          <strong id="streak">観察中</strong>
         </div>
         <button id="helpButton" class="ghost-button" type="button">遊び方</button>
       </section>
 
       <section class="message" id="message">
-        通路をよく観察して、異変があれば「引き返す」。なければ「進む」。
+        異変がなければ前へ進む。異変を見つけたらすぐ引き返す。
       </section>
 
-      <section class="corridor-wrap" aria-label="地下通路">
-        <div class="corridor" id="corridor">
-          <div class="ceiling">
-            <span class="lamp lamp--1"></span>
-            <span class="lamp lamp--2"></span>
-            <span class="lamp lamp--3"></span>
+      <section class="scene-shell" aria-label="3D地下通路">
+        <div class="scene" id="scene">
+          <div class="depth depth--far"></div>
+          <div class="ceiling-3d">
+            <span class="ceiling-line ceiling-line--1"></span>
+            <span class="ceiling-line ceiling-line--2"></span>
+            <span class="ceiling-line ceiling-line--3"></span>
+            <span class="light light--near"></span>
+            <span class="light light--mid"></span>
+            <span class="light light--far"></span>
           </div>
-          <div class="wall wall--left">
-            <div class="poster poster--left" id="posterLeft">
-              <span>出口案内</span>
+
+          <div class="wall-3d wall-3d--left">
+            <div class="tile-grid"></div>
+            <article class="poster poster--blue">
+              <span>アルバイト</span>
+              <strong>募集</strong>
+            </article>
+            <article class="poster poster--cream">
+              <span>地下通路</span>
+              <strong>案内</strong>
+            </article>
+            <article class="poster poster--small">
+              <span>広告</span>
+            </article>
+          </div>
+
+          <div class="wall-3d wall-3d--right">
+            <div class="tile-grid"></div>
+            <div class="exit-board" id="exitBoard">
+              <span>出口</span>
+              <em>Exit</em>
               <strong>8</strong>
             </div>
-            <div class="door" id="doorLeft"><span class="handle"></span></div>
+            <div class="vent vent--top"></div>
+            <div class="service-door"><span></span></div>
+            <div class="notice">防犯カメラ作動中</div>
           </div>
-          <div class="back-wall">
-            <div class="exit-sign" id="exitSign">出口 8</div>
-            <div class="vanishing-door"></div>
+
+          <div class="floor-3d">
+            <div class="floor-grid"></div>
+            <div class="guidance-strip"></div>
+            <span class="fallen-tile"></span>
           </div>
-          <div class="wall wall--right">
-            <div class="poster poster--right" id="posterRight">
-              <span>注意</span>
-              <strong>走らない</strong>
-            </div>
-            <div class="pipe" id="pipe"></div>
+
+          <div class="npc" aria-hidden="true">
+            <span class="npc__head"></span>
+            <span class="npc__neck"></span>
+            <span class="npc__body"></span>
+            <span class="npc__arm npc__arm--left"></span>
+            <span class="npc__arm npc__arm--right"></span>
+            <span class="npc__leg npc__leg--left"></span>
+            <span class="npc__leg npc__leg--right"></span>
+            <span class="npc__bag"></span>
           </div>
-          <div class="floor" id="floor">
-            <span class="floor-line floor-line--left"></span>
-            <span class="floor-line floor-line--right"></span>
-            <span class="lost-tile" id="lostTile"></span>
-          </div>
+
+          <div class="direction-sign">出口 8 ↑</div>
+          <div class="fog"></div>
         </div>
       </section>
 
@@ -71,11 +99,12 @@
 
       <dialog id="helpDialog" class="help-dialog">
         <h1>遊び方</h1>
-        <p>毎回、同じように見える地下通路が表示されます。看板・照明・ポスター・床などに異変がないか確認してください。</p>
+        <p>8番出口風のルールです。毎回同じように見える3D通路を観察し、異変の有無だけを判断します。</p>
         <ul>
           <li>異変を見つけたら「引き返す」</li>
-          <li>何もなければ「進む」</li>
-          <li>8回正解すると脱出成功。間違えると0からやり直しです。</li>
+          <li>異変がなければ「進む」</li>
+          <li>正解すると出口番号が進み、8まで進むと脱出成功です。</li>
+          <li>1回でも間違えると出口0へ戻されます。</li>
         </ul>
         <button id="closeHelpButton" class="action action--safe" type="button">閉じる</button>
       </dialog>

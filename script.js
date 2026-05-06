@@ -1,22 +1,22 @@
 const anomalyDefinitions = [
-  { className: 'anomaly-sign', label: '出口サインが逆さまになっていました。' },
-  { className: 'anomaly-poster', label: '右のポスターの文言が変わっていました。' },
-  { className: 'anomaly-light', label: '中央の照明が赤く光っていました。' },
-  { className: 'anomaly-door', label: '左のドアノブが消えていました。' },
-  { className: 'anomaly-tile', label: '床のタイルが一枚抜けていました。' },
-  { className: 'anomaly-pipe', label: '右の配管の位置がずれていました。' },
-  { className: 'anomaly-poster-left', label: '左のポスターが傾いていました。' },
+  { className: 'anomaly-sign', label: '右上の出口看板が逆さまになっていました。' },
+  { className: 'anomaly-number', label: '出口番号の8が別の記号に変わっていました。' },
+  { className: 'anomaly-light', label: '奥の照明が赤く光っていました。' },
+  { className: 'anomaly-poster', label: '左の青いポスターの文字が変わっていました。' },
+  { className: 'anomaly-door', label: '右の点検扉のノブが消えていました。' },
+  { className: 'anomaly-tile', label: '床タイルが一枚抜けていました。' },
+  { className: 'anomaly-npc', label: '通路の男の頭が逆さまになっていました。' },
+  { className: 'anomaly-vent', label: '右壁の換気口の位置が下がっていました。' },
 ];
 
 const state = {
   exitCount: 0,
-  streak: 0,
   currentAnomaly: null,
   locked: false,
 };
 
 const elements = {
-  corridor: document.querySelector('#corridor'),
+  scene: document.querySelector('#scene'),
   message: document.querySelector('#message'),
   exitCount: document.querySelector('#exitCount'),
   streak: document.querySelector('#streak'),
@@ -28,20 +28,20 @@ const elements = {
 };
 
 function chooseNextScene() {
-  const hasAnomaly = Math.random() < 0.68;
+  const hasAnomaly = Math.random() < 0.62;
   state.currentAnomaly = hasAnomaly
     ? anomalyDefinitions[Math.floor(Math.random() * anomalyDefinitions.length)]
     : null;
 
-  elements.corridor.className = 'corridor';
+  elements.scene.className = 'scene';
   if (state.currentAnomaly) {
-    elements.corridor.classList.add(state.currentAnomaly.className);
+    elements.scene.classList.add(state.currentAnomaly.className);
   }
 }
 
 function render() {
   elements.exitCount.textContent = `${state.exitCount} / 8`;
-  elements.streak.textContent = state.streak;
+  elements.streak.textContent = state.locked ? '移動中' : '観察中';
 }
 
 function setMessage(text, tone = '') {
@@ -49,25 +49,33 @@ function setMessage(text, tone = '') {
   elements.message.textContent = text;
 }
 
-function advanceScene(text, tone) {
+function animateTransition(answeredAnomaly) {
+  elements.scene.classList.add(answeredAnomaly ? 'walk-back' : 'walk-forward', 'flash');
+}
+
+function advanceScene(text, tone, answeredAnomaly) {
   state.locked = true;
+  render();
   setMessage(text, tone);
-  elements.corridor.classList.add('flash');
+  animateTransition(answeredAnomaly);
 
   window.setTimeout(() => {
-    elements.corridor.classList.remove('flash');
+    elements.scene.className = 'scene';
     chooseNextScene();
-    setMessage('通路をよく観察して、異変があれば「引き返す」。なければ「進む」。');
+    setMessage('異変がなければ前へ進む。異変を見つけたらすぐ引き返す。');
     state.locked = false;
     render();
   }, 900);
 }
 
-function resetGame(reason) {
+function resetGame(reason, answeredAnomaly) {
   state.exitCount = 0;
-  state.streak = 0;
-  render();
-  advanceScene(`${reason} 最初の通路に戻されました。`, 'bad');
+  advanceScene(`${reason} 出口0へ戻されました。`, 'bad', answeredAnomaly);
+}
+
+function completeGame(answeredAnomaly) {
+  state.exitCount = 0;
+  advanceScene('脱出成功！ 出口8に到達しました。もう一度、出口0から挑戦できます。', 'good', answeredAnomaly);
 }
 
 function handleAnswer(answeredAnomaly) {
@@ -79,24 +87,20 @@ function handleAnswer(answeredAnomaly) {
   if (!isCorrect) {
     const reason = actuallyAnomaly
       ? `見落としです。${state.currentAnomaly.label}`
-      : '異変はありませんでした。';
-    resetGame(reason);
+      : '異変はありませんでした。進むべき通路でした。';
+    resetGame(reason, answeredAnomaly);
     return;
   }
 
   state.exitCount += 1;
-  state.streak += 1;
 
   if (state.exitCount >= 8) {
-    state.exitCount = 0;
-    state.streak = 0;
-    render();
-    advanceScene('脱出成功！ 8つ目の出口にたどり着きました。もう一度挑戦できます。', 'good');
+    completeGame(answeredAnomaly);
     return;
   }
 
-  const detail = actuallyAnomaly ? state.currentAnomaly.label : '何も変わっていませんでした。';
-  advanceScene(`正解。${detail}`, 'good');
+  const detail = actuallyAnomaly ? state.currentAnomaly.label : '異変なし。正しく前へ進みました。';
+  advanceScene(`正解。${detail}`, 'good', answeredAnomaly);
 }
 
 function openHelp() {
