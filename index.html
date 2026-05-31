@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#050608" />
+    <title>3D Exit Loop - 異変脱出ゲーム</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app" aria-live="polite">
+      <canvas id="gameCanvas" class="game-canvas" aria-label="3D地下通路ゲーム画面"></canvas>
+
+      <section class="hud" aria-label="ゲーム情報">
+        <div class="hud__block">
+          <span class="hud__label">出口</span>
+          <strong id="exitCount">0</strong>
+        </div>
+        <div class="hud__block">
+          <span class="hud__label">状態</span>
+          <strong id="statusText">観察中</strong>
+        </div>
+        <button id="helpButton" class="ghost-button" type="button">遊び方</button>
+      </section>
+
+      <section class="message" id="message">
+        3D通路を見回して判断し、ボタンで実際に進む／引き返す。
+      </section>
+
+      <section class="controls" aria-label="回答">
+        <button id="turnBackButton" class="action action--danger" type="button">
+          <span>異変あり</span>
+          <strong>引き返す</strong>
+        </button>
+        <button id="goForwardButton" class="action action--safe" type="button">
+          <span>異変なし</span>
+          <strong>進む</strong>
+        </button>
+      </section>
+
+      <dialog id="helpDialog" class="help-dialog">
+        <h1>遊び方</h1>
+        <p>これはWebGLで描画する本物の3D通路です。スマホでは画面をドラッグすると少し視点を動かせます。判断したら、ボタンで実際に通路を進む／後ろを向いて引き返します。</p>
+        <ul>
+          <li>通路に異変がなければ「進む」を押して、通路の奥へ歩きます。</li>
+          <li>通路に異変があれば「引き返す」を押して、後ろを向いて戻ります。</li>
+          <li>正解すると出口番号が1つ進みます。</li>
+          <li>1回でも間違えると出口0に戻ります。</li>
+          <li>出口8で正解すると脱出成功です。</li>
+        </ul>
+        <button id="closeHelpButton" class="action action--safe" type="button">閉じる</button>
+      </dialog>
+    </main>
+
+    <script defer src="script.js"></script>
+  </body>
+</html>

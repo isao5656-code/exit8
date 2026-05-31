@@ -1,0 +1,221 @@
+:root {
+  color-scheme: dark;
+  --bg: #050608;
+  --panel: rgba(8, 11, 16, 0.76);
+  --panel-strong: rgba(10, 14, 20, 0.9);
+  --text: #f8fafc;
+  --muted: #a8b0bd;
+  --line: rgba(255, 255, 255, 0.18);
+  --danger: #dc2626;
+  --safe: #16a34a;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  touch-action: none;
+}
+
+button {
+  font: inherit;
+}
+
+.app {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #050608;
+}
+
+.game-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #050608;
+}
+
+.hud,
+.message,
+.controls {
+  position: absolute;
+  z-index: 10;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+}
+
+.hud {
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+}
+
+.hud__block {
+  min-width: 0;
+}
+
+.hud__label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.hud strong {
+  display: block;
+  overflow: hidden;
+  font-size: clamp(1.08rem, 4.6vw, 1.65rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ghost-button {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(31, 41, 55, 0.86);
+  color: var(--text);
+  padding: 0 16px;
+}
+
+.message {
+  left: max(12px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
+  bottom: calc(108px + env(safe-area-inset-bottom));
+  min-height: 50px;
+  padding: 12px 14px;
+  color: #e5e7eb;
+  line-height: 1.55;
+}
+
+.message.is-good {
+  border-color: rgba(34, 197, 94, 0.65);
+  color: #bbf7d0;
+}
+
+.message.is-bad {
+  border-color: rgba(239, 68, 68, 0.75);
+  color: #fecaca;
+}
+
+.controls {
+  left: max(12px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 12px;
+}
+
+.action {
+  min-height: 76px;
+  border: 0;
+  border-radius: 18px;
+  color: white;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.28);
+}
+
+.action:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.action span {
+  display: block;
+  font-size: 0.78rem;
+  opacity: 0.84;
+}
+
+.action strong {
+  display: block;
+  margin-top: 2px;
+  font-size: clamp(1.15rem, 5.4vw, 1.65rem);
+}
+
+.action--danger { background: linear-gradient(180deg, #f87171, #991b1b); }
+.action--safe { background: linear-gradient(180deg, #4ade80, #166534); }
+
+.help-dialog {
+  z-index: 30;
+  width: min(calc(100vw - 28px), 520px);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--panel-strong);
+  color: var(--text);
+  padding: 22px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+}
+
+.help-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.help-dialog h1 {
+  margin-top: 0;
+}
+
+.help-dialog li {
+  margin: 8px 0;
+}
+
+@media (min-width: 760px) {
+  .hud {
+    left: 22px;
+    right: auto;
+    width: min(560px, calc(100vw - 44px));
+  }
+
+  .message {
+    left: 22px;
+    right: auto;
+    bottom: 126px;
+    width: min(680px, calc(100vw - 44px));
+  }
+
+  .controls {
+    left: 22px;
+    right: auto;
+    width: min(680px, calc(100vw - 44px));
+  }
+}
+
+@media (max-width: 430px) {
+  .hud {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ghost-button {
+    grid-column: 1 / -1;
+  }
+
+  .message {
+    bottom: calc(104px + env(safe-area-inset-bottom));
+    font-size: 0.9rem;
+  }
+
+  .action {
+    min-height: 72px;
+  }
+}
